@@ -2,6 +2,7 @@ unit-test-job:
   image: python:3.8-slim
   before_script:
     - pip install flask
+    - pip install flask_testing
   script:
     - echo "Running Python tests... This will take about 2 seconds."
     - python -m unittest test_app.py
