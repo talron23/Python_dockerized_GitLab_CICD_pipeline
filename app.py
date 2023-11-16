@@ -1,7 +1,9 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import requests
 
 app = Flask(__name__)
+CORS(app) 
 
 @app.route('/get_joke', methods=['GET'])
 def get_joke():
@@ -10,9 +12,18 @@ def get_joke():
 
     if response.status_code == 200:
         joke_data = response.json()
-        return jsonify({'joke': joke_data['setup'], 'punchline': joke_data['delivery']})
+
+        # Print the response for debugging
+        print("API Response:", joke_data)
+
+        # Check if 'setup' and 'punchline' keys exist in the response
+        if 'setup' in joke_data and 'punchline' in joke_data:
+            return jsonify({'joke': joke_data['setup'], 'punchline': joke_data['punchline']})
+        else:
+            return jsonify({'error': 'Invalid joke format from the external API'}), 500
+
     else:
-        return jsonify({'error': 'Failed to fetch joke'}), 500
+        return jsonify({'error': f'Failed to fetch joke. Status code: {response.status_code}'}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
