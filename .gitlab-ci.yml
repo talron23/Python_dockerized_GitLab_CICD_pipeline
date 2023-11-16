@@ -3,6 +3,7 @@ unit-test-job:
   before_script:
     - pip install flask
     - pip install flask_testing
+    - pip install flask_cors
   script:
     - echo "Running Python tests... This will take about 2 seconds."
     - python -m unittest test_app.py
