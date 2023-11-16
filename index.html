@@ -1,0 +1,56 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joke Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+
+        #joke-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Joke Generator</h1>
+
+    <div id="joke-container">
+        <p id="setup"></p>
+        <p id="delivery"></p>
+    </div>
+
+    <button onclick="getJoke()">Get Joke</button>
+
+    <script>
+        async function getJoke() {
+            try {
+                const response = await fetch('http://localhost:5000/get_joke');
+                const jokeData = await response.json();
+
+                document.getElementById('setup').innerText = `Setup: ${jokeData.joke}`;
+                document.getElementById('delivery').innerText = `Punchline: ${jokeData.punchline}`;
+            } catch (error) {
+                console.error('Failed to fetch joke:', error);
+                alert('Failed to fetch joke. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
