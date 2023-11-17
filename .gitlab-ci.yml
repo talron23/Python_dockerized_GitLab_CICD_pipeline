@@ -1,4 +1,9 @@
+stages:
+  - test
+  - build
+
 test-job:
+  stage: test
   image: python:3.8-slim
   before_script:
     - pip install flask
@@ -12,6 +17,7 @@ test-job:
 
 
 build_image:
+  stage: build
   image: docker:24.0
   services:
     - docker:24.0-dind
