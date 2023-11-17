@@ -36,6 +36,6 @@ deploy:
     - chmod 400 $SSH_KEY
   script:
     - ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@54.145.82.191 "
-       docker ps -aq | xargs docker stop | xargs docker rm &&
+       docker ps -aq | xargs -r docker stop | xargs -r docker rm &&
        docker run -d -p 5000:5000 talron23/joke:python-app-1.0"
        
