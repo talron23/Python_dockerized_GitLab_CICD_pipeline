@@ -1,9 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 import requests
 
 app = Flask(__name__)
 CORS(app) 
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/get_joke', methods=['GET'])
 def get_joke():
