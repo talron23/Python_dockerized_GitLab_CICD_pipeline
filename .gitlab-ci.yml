@@ -16,7 +16,6 @@ test-job:
     - python -m unittest test_app.py
     - echo "Code coverage is 90%"
 
-
 build_image:
   stage: build
   image: docker:24.0
@@ -27,15 +26,19 @@ build_image:
   before_script:
     - docker login -u $REGISTRY_USER -p $REGISTRY_PASS
   script:
-    - docker build -t talron23/joke:python-app-1.0 . 
-    - docker push talron23/joke:python-app-1.0
+    - docker build -t talron23/joke:python-app-2.0 . 
+    - docker push talron23/joke:python-app-2.0
 
 deploy:
+  image: $CI_TEMPLATE_REGISTRY_HOST/gitlab-org/terraform-images/releases/1.4:v1.0.0
   stage: deploy
   before_script:
-    - chmod 400 $SSH_KEY
+   - cd terraform
+   - terraform init
   script:
-    - ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@54.145.82.191 "
-       docker ps -aq | xargs -r docker stop | xargs -r docker rm &&
-       docker run -d -p 5000:5000 talron23/joke:python-app-1.0"
-       
+   - terraform destroy -auto-approve
+   - echo "deploying . . . " 
+   - terraform apply -auto-approve
+   - echo "Application deployed successfully . . . ." 
+   - terraform destroy -auto-approve
+   - echo "Application Destroyed . . . ." 
