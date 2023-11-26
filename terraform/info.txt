@@ -1,0 +1,118 @@
+{
+    "tasks": [
+        {
+            "attachments": [
+                {
+                    "id": "db40287f-751e-4ea3-a05d-9de965ad3e5a",
+                    "type": "ElasticNetworkInterface",
+                    "status": "ATTACHED",
+                    "details": [
+                        {
+                            "name": "subnetId",
+                            "value": "subnet-0cff775b5edc1b553"
+                        },
+                        {
+                            "name": "networkInterfaceId",
+                            "value": "eni-059462a3f4bdb315b"
+                        },
+                        {
+                            "name": "macAddress",
+                            "value": "02:7b:a7:95:85:6b"
+                        },
+                        {
+                            "name": "privateDnsName",
+                            "value": "ip-172-31-9-238.ec2.internal"
+                        },
+                        {
+                            "name": "privateIPv4Address",
+                            "value": "172.31.9.238"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "ecs.cpu-architecture",
+                    "value": "x86_64"
+                }
+            ],
+            "availabilityZone": "us-east-1a",
+            "clusterArn": "arn:aws:ecs:us-east-1:371029671060:cluster/ecs-joke-app",
+            "connectivity": "CONNECTED",
+            "connectivityAt": "2023-11-25T14:23:04.455000+02:00",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:371029671060:container/ecs-joke-app/dffaa3887df04d39bc8469b8811fe3fe/6d002aad-3fe5-4cd1-9abb-1a91f68e65a6",
+                    "taskArn": "arn:aws:ecs:us-east-1:371029671060:task/ecs-joke-app/dffaa3887df04d39bc8469b8811fe3fe",
+                    "name": "joke_app",
+                    "image": "talron23/joke:python-app-2.0",
+                    "imageDigest": "sha256:2295bc1994038b5f7f5cf88661e5f1d69cd32a9c6592c24405a4e5617df21cc2",
+                    "runtimeId": "dffaa3887df04d39bc8469b8811fe3fe-3946534750",
+                    "lastStatus": "RUNNING",
+                    "networkBindings": [],
+                    "networkInterfaces": [
+                        {
+                            "attachmentId": "db40287f-751e-4ea3-a05d-9de965ad3e5a",
+                            "privateIpv4Address": "172.31.9.238"
+                        }
+                    ],
+                    "healthStatus": "UNKNOWN",
+                    "cpu": "0"
+                }
+            ],
+            "cpu": "256",
+            "createdAt": "2023-11-25T14:23:00.919000+02:00",
+            "desiredStatus": "RUNNING",
+            "enableExecuteCommand": false,
+            "group": "service:joke-app-service",
+            "healthStatus": "UNKNOWN",
+            "lastStatus": "RUNNING",
+            "launchType": "FARGATE",
+            "memory": "512",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "joke_app"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "pullStartedAt": "2023-11-25T14:23:13.943000+02:00",
+            "pullStoppedAt": "2023-11-25T14:23:18.443000+02:00",
+            "startedAt": "2023-11-25T14:23:19.015000+02:00",
+            "startedBy": "ecs-svc/1901164457023201815",
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:371029671060:task/ecs-joke-app/dffaa3887df04d39bc8469b8811fe3fe",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:371029671060:task-definition/joke-app-task:4",
+            "version": 3,
+            "ephemeralStorage": {
+                "sizeInGiB": 20
+            }
+        }
+    ],
+    "failures": []
+}
+
+
+$ aws ec2 describe-network-interfaces --network-interface-ids $(aws ecs describe-tasks --cluster ecs-joke-app --tasks dffaa3887df04d39bc8469b8811fe3fe --query "tasks[0].attachments[0].details[?name=='networkInterfaceId'].value" --output text)
+
+aws ecs describe-tasks --cluster ecs-joke-app --tasks dffaa3887df04d39bc8469b8811fe3fe --query "tasks[0].attachments[0].details[?name=='networkInterfaceId'].value" --output text
+
+/
+
+$ aws ecs list-tasks --cluster ecs-joke-app --query "taskArns" --output text
+
+$ aws ecs describe-tasks --cluster ecs-joke-app --tasks $(aws ecs list-tasks --cluster ecs-joke-app --query "taskArns" --output text)
+
+aws ec2 describe-network-interfaces --network-interface-ids $(aws ecs describe-tasks --cluster ecs-joke-app --tasks $(aws ecs list-tasks --cluster ecs-joke-app --query "taskArns" --output text) | grep -i eni | awk -F'"' '{print $4}')
+
+    provisioner "local-exec" {
+    command = <<-EOT
+      bash -c '
+        task_arn=$(aws ecs list-tasks --cluster ecs-joke-app --query "taskArns" --output text)
+        eni_id=$(aws ecs describe-tasks --cluster ecs-joke-app --tasks $task_arn | grep -i eni | awk -F'"' '{print $4}')
+        aws ec2 describe-network-interfaces --network-interface-ids $eni_id | grep PublicIp | awk "NR < 2"
+      '
+    EOT
